@@ -1,0 +1,103 @@
+#head{
+	text-align:center;
+	padding: 20px;
+	color:black;
+	margin: 20px;
+}
+.para{
+	font-size: 20px;
+	color:black;
+	text-align: justify;
+	padding:0px 20px;
+}
+.heading{
+	line-height: 80%;
+	font-size: 30px;
+	color:red;
+}
+.four{
+	text-transform: uppercase;
+	padding:30px;
+}
+.navbar-text{
+	margin:15px;
+	font-size: 25px;
+	padding: 0px;
+}
+.btn{
+	/*margin: 15px 90px 15px ;*/
+	font-size: 20px;	
+
+}
+.navbar-dark .navbar-nav .nav-link{
+	padding-right: 20px;
+	font-size: 22px;
+}
+.icon{
+	font-size: 30px;
+	text-align: center;
+    width: 100%;
+}
+.four{
+	text-align: center;
+    
+}
+.fas.fa-phone-volume{
+	font-size: 30px;
+	padding: 10px;
+	margin-left: 10px;
+}
+.fas.fa-heartbeat{
+	font-size: 90px;
+}
+.fas.fa-map-pin{
+	font-size: 30px;
+	padding: 10px;
+}
+.list-group{
+	padding-left: 20px;
+}
+.footlist{
+	padding-top: 30px;
+}
+.form-control {
+	/* background: transparent; */
+	border: none;
+	border-bottom: 1px solid #474646;
+	/* -webkit-box-shadow: none; */
+	/* box-shadow: none; */
+	border-radius: 0;
+  }
+.fab.fa-gratipay{
+	font-size:50px;
+	
+}
+html, body {
+	overflow-x: hidden;
+  }
+
+  section {
+	box-sizing: border-box; /* or not */
+	margin: 0 auto;
+	width: 25rem;
+	background: white;
+	padding: 1.5rem;
+  }
+.full-width {
+	/* position: relative; child absolute */
+	margin: 0 -9999rem;
+	/* add back section padding value */
+	padding: .25rem 9999rem;
+  }
+.text-muted{
+	text-align: left;
+}
+ul.planlist{
+	list-style: none;
+  }
+ul.planlist li.pl_li:before {
+	content: '✓';
+	padding-right: 10px;
+	color: rgb(218, 181, 19);
+	font-weight: bold;
+  }
