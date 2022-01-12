@@ -1,0 +1,140 @@
+<?php  
+	require('template/header.phtml'); 
+	// require('Models/User.php');
+	require('Models/Customer.php');
+
+    $loginObj = new User();
+	
+	$msg = $msg1 = $msg2 = '';
+
+	$user = '';
+
+	$name = $email = $phone = '';
+
+
+	if(isset ($_POST['submit']) ) {
+		$user = $_POST['user'];
+        $userpass = md5($_POST['password']);
+
+        $emailExists = $loginObj->emailExists($user, 'member');
+        $phoneExists = $loginObj->phoneExists($user, 'member');
+
+	    if($emailExists || $phoneExists){
+			$userQ = $loginObj->login($user, $userpass, 'member');
+			$row = mysqli_fetch_assoc($userQ);
+	    	session_start();
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['user_name'] = $row['name'];
+            $_SESSION['user_type'] = 'member';
+            $_SESSION['user_email'] = $row['email'];
+            header("location:index.php");
+        }else{
+            $msg = "User does not exists";
+        }		
+	}
+
+	if (isset($_POST['guestSubmit'])) {
+        $name = $_POST['name'];
+		$email = $_POST['email'];
+		$phone = $_POST['phone'];
+	    $guestObj = new Customer();
+
+	   /* $emailExists = $guestObj->emailExists($user, 'guest');
+        $phoneExists = $guestObj->phoneExists($user, 'guest');*/
+
+		$user = $guestObj->guestLogin($name, $email, $phone, "guest");
+	    if($user){
+	    	$row = mysqli_fetch_assoc($user);
+	    	session_start();
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['user_name'] = $row['name'];
+            $_SESSION['user_type'] = 'guest';
+            $_SESSION['user_email'] = $row['email'];
+
+            header("location:index.php");
+        }else{
+            $msg1 = "Oops! Something went wrong. Please Try again later.";
+        }
+	}
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+
+<div class="division"> 
+	<div class="in-division">
+	
+		<form action="" method="post" class="form">
+
+			<div class="panel">
+
+				<h2 class="panel-title">MEMBER LOGIN</h2>
+				
+				<?php 
+					if($msg != null) {
+						echo "<div class='error'>$msg</div>";
+					}
+				?>
+
+				<div class="form-group">			
+					<label for="">Email / Phone<span>*</span></label> 
+					<input type="text" name="user" placeholder="Enter email/Phone" value="<?= $user; ?>" required class="form-control" value="<?= $user; ?>">			
+				</div>
+				<div class="form-group">	
+					<label for="">Pasword<span>*</span></label>
+					<input type="password" name="password" placeholder="Enter password" required class="form-control">
+				</div>
+				<div class="form-group button-input">			
+					<input type="submit" value="Login" name="submit" class="btn">
+				</div>
+
+			</div>
+		</form>
+</div>
+	<div class="in-division">
+
+			<form action="" method="post" class="form">
+
+			<div class="panel">
+
+
+				<h2 class="panel-title">GUEST LOGIN</h2>
+				
+				<?php 
+					if($msg1 != null) {
+						echo "<div class='error'>$msg1</div>";
+					}
+				?>
+				<div class="form-group">	
+					<label for="">Name<span>*</span></label>
+					<input type="text" name="name" placeholder="Enter name" required class="form-control" pattern="[A-Za-z ]+" title="Enter valid name" value="<?= $name; ?>">
+				</div>
+				
+				<div class="form-group">			
+					<label for="">Email<span>*</span></label>
+					<input type="email" name="email" placeholder="Enter email" class="form-control" required  value="<?= $email ; ?>">			
+				</div>
+
+				<div class="form-group">			
+					<label for="">Phone<span>*</span></label>
+					<input type="text" name="phone" placeholder="Enter Phone" class="form-control" required pattern="[0-9-]{8,15}" title="Please enter valid Phone no"  value="<?= $phone; ?>">			
+				</div>
+				
+				<div class="form-group button-input">			
+					<input type="submit" value="Login" name="guestSubmit" class="btn">
+				</div>
+
+			</div>
+		</form>
+
+	</div>
+</div>
+
+<?php  
+	require('template/footer.phtml'); 
+?>
+

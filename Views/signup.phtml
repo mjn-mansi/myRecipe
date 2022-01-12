@@ -1,0 +1,94 @@
+<?php  
+	require('template/header.phtml'); 
+	require('Models/Customer.php'); 
+
+	$registerObj = new Customer();
+	$msg = $msg1 = $msg2 = '';
+
+	$name = $email = $phone = $address = '';
+
+	if(isset ($_POST['submit'])){
+		$name = $_POST['name'];
+		$email = $_POST['email'];
+		$phone = $_POST['phone'];
+		$address = $_POST['address'];
+		$password = $_POST['password'];
+		$cpassword = $_POST['cpassword'];
+
+
+    	if( $registerObj->emailExists($email, 'member') ) {
+    		$msg = "This Email already exists.";
+    	}elseif( $registerObj->phoneExists($phone, 'member') ) {
+    		$msg = "This Phone No already exists.";
+    	}elseif( $registerObj->passwordMatch($password, $cpassword) ) {
+    		$msg = "Pasword do not match";
+    	}else{
+    		$signupQuery = $registerObj->register($name, $email, $phone, $address, $password);
+			if($signupQuery){
+    	?>
+    			<script>
+    				alert("Thankyou for registering with us. Please login to continue.");
+    				window.location.href="login.php";
+    			</script>
+    		<?php 
+    			}else{
+    				echo "Oops! Something went wrong";
+    			}
+    	}
+    	
+	}
+?>
+
+
+<form action="" method="post" class="form">
+
+	<div class="panel">
+		<h2 class="panel-title">SIGNUP HERE</h2>
+		
+		<?php 
+			if($msg != null) {
+				echo "<div class='error'>$msg</div>";
+			}
+		?>
+
+		<div class="form-group">			
+			<label for="">Enter Name<span>*</span></label>
+			<input type="text" name="name" placeholder="Enter name" value="<?= $name; ?>" required class="form-control" pattern="[A-Za-z ]+" title="Enter valid name containing letters only.">
+		</div>
+		<div class="form-group">			
+			<label for="">Enter Email<span>*</span></label>
+			<input type="email" name="email" placeholder="Enter email" value="<?= $email; ?>" required class="form-control" >			
+		</div>
+		<div class="form-group">			
+			<label for="">Enter Phone No<span>*</span></label>
+			<input type="text" name="phone" placeholder="Enter phone" value="<?= $phone; ?>" required class="form-control" pattern="[0-9-]{8,15}" title="Please enter valid Phone no.">
+		</div>
+		<div class="form-group">	
+			<label for="">Enter Pasword<span>*</span></label>
+			<input type="password" name="password" placeholder="Enter password" required class="form-control"  pattern=".{5,15}" title="Please enter valid password of length 5-15 characters">
+		</div>
+		<div class="form-group">			
+			<label for="">Confirm Your Pasword<span>*</span></label>
+			<input type="password" name="cpassword" placeholder="Enter password" required class="form-control" pattern=".{5,15}" title="Please enter valid password of length 5-15 characters">
+		</div>
+		<div class="form-group">			
+			<label for="">Enter Address<span>*</span></label>
+			<textarea name="address" placeholder="Enter Address" required class="form-control"><?= $address; ?></textarea>
+		</div>
+		<div class="form-group">
+			<div class="checkbox-input">
+				<input type="checkbox" name="checked" id="Terms" required checked><label for="Terms" class="terms">Terms & Conditions</label>			
+			</div>
+		</div>
+		<div class="form-group button-input">			
+			<input type="submit" value="Signup" name="submit" class="btn">
+		</div>
+
+	</div>
+</form>
+
+
+<?php  
+	require('template/footer.phtml'); 
+?>
+

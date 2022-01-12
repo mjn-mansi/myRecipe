@@ -1,0 +1,82 @@
+<?php 
+	session_start(); 
+	date_default_timezone_set("Asia/Kolkata");
+	require('database/connection.php');
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Cafe Coffee Day | <?php echo $view->pageTitle; ?></title>
+	<link rel="stylesheet" href="css/style.css"> 
+	<link rel="stylesheet" href="css/navbar.css"> 
+	<link rel="stylesheet" href="css/responsive.css"> 
+	
+</head>
+<body>
+	 
+<header>
+
+<div class="logo-block">	
+	<div class="logo">
+		<img src="images/logo1.png" alt="" class="logo-img">
+		<div class="logo-name">
+			<a href="index.php" >Cafe Coffe Day</a>
+		</div>
+		
+	</div>	
+	<div class="menu-icon">
+		<input type="checkbox" id="chckMenu" onchange="showMenu()">
+		<label for="chckMenu" class="chkMenu">&#8801;</label>
+	</div>
+</div>
+	<nav class="top-nav" id="navbar">
+		<ul>
+			<li><a href="index.php">Home</a></li>
+			<li><a href="about-us.php">About Us</a></li>
+			
+			<?php
+                if(!isset($_SESSION['user_id'])){ 
+            ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="Signup.php">Signup</a></li>
+            <?php 
+                }else{
+            ?>
+            	<li class="dropdown">
+					<a href="#" class="nav-bookings" onclick="drop('nav-bookings')">Bookings&#9660;</a>
+					<ul class="dropmenu" id="nav-bookings">
+						<li><a href="booking.php?bookingType=takeAway">Take Away</a></li>
+						<li><a href="booking.php?bookingType=dineIn">Table & Dine in</a></li>
+						<li><a href="booking.php?bookingType=seaView">Sea View</a></li>
+					</ul>
+				</li>
+
+				<li><a href="my-bookings.php">My Bookings</a></li>
+				
+			<?php 
+				}
+			?>	
+				<li><a href="#contact">Contact Us</a></li> 
+
+			<?php  
+				if(isset($_SESSION['user_id']) ){
+			?>
+            	<li class="dropdown">
+					<a href="#" onclick="drop('nav-user')"><?= $_SESSION['user_name']; ?>&#9660;</a>
+					<ul class="dropmenu" id="nav-user">
+                		<li><a href="logout.php">Logout</a></li>
+					</ul>
+				</li>
+            <?php 
+                }
+            ?>
+		</ul>
+	</nav>
+</header>
+
+
+
+<div class="container">

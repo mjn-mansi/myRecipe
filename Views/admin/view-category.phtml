@@ -1,0 +1,64 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Category.php');
+
+	$categoryObj = new Category();
+	$categories = $categoryObj->show();
+
+	$msg = $category = '';
+
+	if (isset($_GET['category_del_id'])) {
+		$delQ = $categoryObj->delete($_GET['category_del_id']);
+		if($delQ) {
+            header("location:view-category.php?msg=Successfully Deleted");
+		}else{
+            $msg = "Oops! something went wrong. Please Try again later";
+		}
+	}
+
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+	
+<div class="panel">
+
+	<h2 class="panel-title">View Category</h2>
+
+	<div class="tbl-container">	
+		<table class="tbl">
+			<tr>
+				<th>#</th>
+				<th>Category</th>
+				<th>Action</th>
+			</tr>
+			<?php 
+				$i = 1;
+				while ($row = mysqli_fetch_assoc($categories)) {
+					echo "<tr>
+							<td>$i</td>
+							<td>$row[category_name]</td>
+							<td>
+								<a href='category.php?category_edit_id=$row[category_id]' class='edit-btn'>Edit</a>
+								<a href='view-category.php?category_del_id=$row[category_id]' class='delete-btn'>Delete</a>
+
+							</td>
+						</tr>";
+					$i++;	
+				}
+			?>
+		</table>
+	</div>
+	
+</div>
+	
+<?php  
+	require('template/footer.phtml'); 
+?>
+

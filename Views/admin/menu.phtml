@@ -1,0 +1,117 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Menu.php');
+
+	$msg = $name = $price = $category = '';
+
+	$menuObj = new Menu();
+	$users = $menuObj->show();
+
+	$categories = $menuObj->showCategory();
+
+	if (isset($_GET['menu_edit_id'])) {
+		$editQ = $menuObj->edit($_GET['menu_edit_id']);
+		if($editQ) {
+			$editR = mysqli_fetch_assoc($editQ);
+            $name = $editR['menu_name'];
+            $price = $editR['menu_price'];
+            $categoryid = $editR['category_id'];
+		}else{
+            $msg = "Oops! something went wrong. Please Try again later";
+		}
+
+		if(isset ($_POST['submit'])){
+			$name = $_POST['name'];
+			$price = $_POST['price'];
+			$category = $_POST['category'];
+
+			$exists = $menuObj->checkeditExists($category, $name, $_GET['menu_edit_id']);
+			if($exists) {
+				$msg = "This menu item is already added.";
+			}else{
+				$menu = $menuObj->update($name, $price, $category, $_GET['menu_edit_id']);
+			    if($menu){
+		            header("location:view-menu.php?msg=Updated Successfully");
+		        }else{
+		            $msg = "Oops! something went wrong. Please Try again later";
+		        }	
+			}					
+		}
+	}else{
+		if(isset ($_POST['submit'])){
+			$name = $_POST['name'];
+			$price = $_POST['price'];
+			$category = $_POST['category'];
+
+			$exists = $menuObj->checkExists($category, $name);
+
+			if($exists) {
+				$msg = "This menu item already exists";
+			}else{
+				$menu = $menuObj->add($name, $price, $category);
+			    if($menu){
+		            header("location:menu.php?msg=Successfully Added");
+		        }else{
+		            $msg = "Oops! something went wrong. Please Try again later";
+		        }
+			}
+					
+		}
+	}	
+	
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+
+
+<form action="" method="post" class="form">
+
+	<div class="panel">
+
+		<h2 class="panel-title">menu</h2>
+		
+		<?php 
+			if($msg != null) {
+				echo "<div class='error'>$msg</div>";
+			}
+		?>
+		
+		<div class="form-group">			
+			<label for="">Category</label>
+			<select name="category" id="" required class="form-control">
+				<?php 
+					while($category = mysqli_fetch_assoc($categories)){
+						if($categoryid == $category['category_id']) {
+							echo "<option value='$category[category_id]' selected>$category[category_name]</option>";
+						}else{
+							echo "<option value='$category[category_id]'>$category[category_name]</option>";
+						}
+					}
+				?>
+			</select>
+		</div>
+		<div class="form-group">			
+			<label for="">Menu Name</label>
+			<input type="text" name="name" placeholder="Enter Menu Name" value="<?= $name; ?>" required class="form-control">			
+		</div>
+		<div class="form-group">			
+			<label for="">Price</label>
+			<input type="text" name="price" placeholder="Enter price" value="<?= $price; ?>" required class="form-control" pattern="[0-9.]{1,10}" title="Please enter valid value">			
+		</div>
+		<div class="form-group button-input">			
+			<input type="submit" value="Submit" name="submit" class="btn">
+		</div>
+
+	</div>
+</form>
+
+<?php  
+	require('template/footer.phtml'); 
+?>

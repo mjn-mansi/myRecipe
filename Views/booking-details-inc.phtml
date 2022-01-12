@@ -1,0 +1,183 @@
+<style>
+	#invoiceHeading, #invoiceInfo {
+		display: none;
+	}
+</style>
+
+<div id="print-content"> 
+	
+	<div class="detail-container">
+
+
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/responsive.css">
+
+		<div class="invoice-heading" id="invoiceHeading">
+			<h3>INVOICE</h3>
+			<div class="invoice-logo">
+				<img src="images/logo1.png" alt="" class="">
+				<div class="logo-name">
+					Cafe Coffe Day
+				</div>
+			</div>	
+			
+		</div>
+
+		<div class='bill-row' id="invoiceInfo">						
+			<div class='bill-col'>
+				<span class='bill-heading'>Invoice To:</span>
+				<span class='bill-content'><?= $_SESSION['user_name']; ?><br><?= $_SESSION['user_email']; ?></span>
+			</div>
+		</div>
+
+	<?php   
+
+		if ($bookingType == 'takeAway' || $bookingType == 'dineIn') { 
+			
+			$bookings = $bookingObj->showBookingDetail($bookingId, $bookingType);
+			
+			$bookQ = mysqli_query($bookingObj->connect(), "SELECT * FROM booking WHERE booking_id = '$bookingId' ");
+
+			$bookR = mysqli_fetch_assoc($bookQ);
+		}
+		elseif ($bookingType == 'seaView') {
+
+			$bookings = $bookingObj->showSeaViewDetail($bookingId, $bookingType);
+			$bookR = mysqli_fetch_assoc($bookings);	
+
+		}	
+
+			if ($bookR['payment_status'] == 'paid') {
+				
+				echo "<div class='bill-row'>						
+						<div class='bill-col'>
+							<span class='bill-heading'>Order Date:</span>
+							<span class='bill-content'>".date('jS M Y', strtotime($bookR['booking_date']))."</span>
+						</div>
+						<div class='bill-col'>
+							<span class='bill-heading'>Order Time:</span>
+							<span class='bill-content'>".date('h:i a', strtotime($bookR['booking_time']))."</span>
+						</div>
+						<div class='bill-col'>
+							<span class='bill-heading'>Booking Id:</span>
+							<span class='bill-content'>".$bookR['booking_id']."</span>
+						</div>
+					</div>";
+
+				if ($bookingType == 'dineIn' || $bookingType == 'seaView') {
+					echo "<div class='bill-row'>						
+							<div class='bill-col'>
+								<span class='bill-heading'>No of Members:</span>
+								<span class='bill-content'>$bookR[noOfPerson]</span>
+							</div>
+							<div class='bill-col'>
+								<span class='bill-heading'>Members Ages:</span>
+								<span class='bill-content'>$bookR[person_ages] years old</span>
+							</div>";
+							if($bookingType == 'seaView') {
+								echo "<div class='bill-col'>
+										<span class='bill-heading'>Booking Limit:</span>
+										<span class='bill-content'>$bookR[booking_limit]</span>
+									</div>";
+							}
+					echo "</div>";
+				}
+			}	
+
+
+			echo "<p class='bill-subheading'>YOUR ORDER SUMMARY</p>";
+
+			if ($bookingType == 'dineIn' || $bookingType == 'takeAway') {
+				
+				echo "<table width='100%' class='book_tbl1'>";
+						echo "<tr>
+								<th width='5%'>Sr.</th>
+								<th>Name</th>
+								<th width='15%'>Price</th>
+								<th width='15%'>Qty</th>
+								<th width='15%'>Total</th>
+							</tr>";
+						$i = 1;
+
+					while($book = mysqli_fetch_assoc($bookings)){
+						echo "<tr>
+								<td>$i</td>
+								<td>$book[menu_name]</td>
+								<td>$$book[menu_price]</td>
+								<td>$book[food_qty]</td>
+								<td>$".$book['food_price']*$book['food_qty']."</td>
+							</tr>";
+						$i++;
+					}
+					echo "<tr>
+							<td colspan='2'></td>
+							<td style='color: #007290;'><b>Total Amount: </b></td>
+							<td class='total' colspan='2'>$$bookR[payment_amount]</td>
+						</tr>";
+
+				echo "</table>";
+
+			}elseif ($bookingType == 'seaView') {
+			
+				echo "<table width='100%' class='book_tbl1'>";
+						echo "<tr>
+								<th width='5%'>Sr.</th>
+								<th>Name</th>
+								<th width='15%'>Total</th>
+							</tr>";
+						$i = 1;
+
+						echo "<tr>
+								<td>$i</td>
+								<td>Sea View</td>
+								<td>$$bookR[payment_amount]</td>
+							</tr>";
+					echo "<tr>
+							<td></td>
+							<td style='color: #007290;'><b>Total Amount: </b></td>
+							<td class='total' colspan='2'>$$bookR[payment_amount]</td>
+						</tr>";
+
+				echo "</table>";
+
+			}
+
+			
+			if($bookR['payment_status'] == 'paid'){
+				echo "<div class='bill-blok'>
+						<form method='post' action='reorder.php'>
+							<input type='hidden' name='bookId' value='$bookR[booking_id]'>
+							<input type='hidden' name='bookType' value='$bookR[booking_type]'>
+							<button type='submit' name='reorder' class='view-btn'  id='reorder1'>Reorder Now</button>
+						</form>&nbsp;&nbsp;
+						<input type=\"button\" onclick=\"printDiv('print-content')\" value=\"Print Invoice\" class=\"blue-btn\" id=\"printpagebutton\">
+					</div>";
+			}elseif($bookR['payment_status'] == 'unpaid' && empty($bookR['payment_mode']) ){
+				echo "<div class='bill-blok'><a href='payment.php?booking_id=$bookR[booking_id]&&booking_type=$bookR[booking_type]' class='view-btn'>Pay now</a></div>";
+			}
+
+	?>
+
+	</div>
+</div>
+
+<script>
+	function printDiv(divName) {
+    var printButton = document.getElementById("printpagebutton");
+    
+    var viewButtons = document.querySelectorAll(".view-btn");
+
+    viewButtons.forEach(v => v.style.visibility = 'hidden');
+    document.querySelector('#invoiceHeading').style.visibility = 'display';
+    document.querySelector('#invoiceInfo').style.visibility = 'display';
+
+    //Set the print button visibility to 'hidden' 
+    printButton.style.visibility = 'hidden';
+    var printContents = document.getElementById(divName).innerHTML;
+    w=window.open();
+    w.document.write(printContents);
+    w.print();
+    w.close();
+    printButton.style.visibility = 'visible';
+}
+</script>

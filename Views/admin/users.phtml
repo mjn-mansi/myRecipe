@@ -1,0 +1,55 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Admin.php');
+
+	$userObj = new Admin();
+	$users = $userObj->showUsers();
+	
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+
+	<div class="panel">
+
+		<h2 class="panel-title">View Users</h2>
+	
+		<div class="tbl-container">	
+			<table class="tbl">
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Phone</th>
+					<th>Address</th>
+					<th>Type</th>
+				</tr>
+				<?php
+					$i = 1;
+					while ($row = mysqli_fetch_assoc($users)) {
+						echo "<tr>
+								<td>$i</td>
+								<td>$row[name]</td>
+								<td>$row[email]</td>
+								<td>$row[phone]</td>
+								<td>$row[address]</td>
+								<td>$row[type]</td>
+							</tr>";
+						$i++;	
+					}
+				?>
+			</table>
+		</div>
+	
+	</div>
+
+<?php  
+	require('template/footer.phtml'); 
+?>
+

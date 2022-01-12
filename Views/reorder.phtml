@@ -1,0 +1,20 @@
+<?php  
+	session_start();
+	require('database/Connection.php');
+	require('Models/Booking.php');
+    $bookingObj = new Booking();
+
+	if (isset($_POST['reorder'])) {
+		// print_r($_POST);
+		$_POST['bookId'];
+		$_POST['bookType'];
+
+		$bid = $bookingObj->reorder($_POST['bookId'], $_POST['bookType']);
+		if($bookingObj){
+			header("Location: payment.php?booking_type=$_POST[bookType]&&booking_id=$bid&&reorder=yes");
+		}else{
+			echo "Something went wrong";
+		}	
+
+	} 
+?>

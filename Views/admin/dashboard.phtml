@@ -1,0 +1,79 @@
+ <?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+
+	require('../Models/Dashboard.php');
+
+	$adminObj = new Dashboard();
+
+?>
+
+	<div class="grid">
+		<div class="box box1">
+			<h1>Take Away Bookings</h1>
+			<p>
+				<?php 
+					$takeAway = $adminObj->counttakeAway();
+					echo $takeAway;
+				?>
+			</p>
+			<a href="bookings.php?bookingType=takeAway">View All</a>
+		</div>
+		<div class="box box2">
+			<h1>Dine In Bookings</h1>
+			<p>
+				<?php 
+					$totDinein = $adminObj->countdineIn();
+					echo $totDinein;
+				?>
+			</p>
+			<a href="bookings.php?bookingType=dineIn">View All</a>
+		</div>
+		<div class="box box3">
+			<h1>Sea Views Bookings</h1>
+			<p>
+				<?php 
+					$totSea = $adminObj->countseaview();
+					echo $totSea;
+				?>
+			</p>
+			<a href="bookings.php?bookingType=seaView">View All</a>
+		</div>
+		<div class="box box4">
+			<h1>Users</h1>
+			<p>
+				<?php 
+					$totUsers = $adminObj->countUsers();
+					echo $totUsers;
+				?>
+			</p>
+			<a href="users.php">View All</a>
+		</div>
+		<div class="box box5">
+			<h1>Category</h1>
+			<p>
+				<?php 
+					$totCat = $adminObj->countCategory();
+					echo $totCat;
+				?>
+			</p>
+			<a href="view-category.php">View All</a>
+		</div>
+		<div class="box box6">
+			<h1>Menu</h1>
+			<p>
+				<?php 
+					$totMenu = $adminObj->countMenu();
+					echo $totMenu;
+				?>
+			</p>
+			<a href="view-menu.php">View All</a>
+		</div>
+		
+		
+	</div>
+
+<?php  
+	require('template/footer.phtml'); 
+?>
+

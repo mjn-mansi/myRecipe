@@ -1,0 +1,65 @@
+<?php  
+	require('template/header.phtml'); 
+	require('Models/Booking.php');
+	
+	$bookingObj = new Booking();
+	$delbookings = $bookingObj->deleteOldBookings();
+	$bookings = $bookingObj->viewMyBookings();
+?>
+
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+<div class="panel">
+	<h2 class="panel-title">My Bookings</h2>
+	<?php
+		if (mysqli_num_rows($bookings) >= 1) {
+			
+	?>
+	<div class="tbl-container">
+
+		<table class="user-tbl">
+			<tr>
+				<th width="5%">#</th>
+				<th>Date</th>
+				<th>Time</th>
+				<th>Booking</th>
+				<th>Amount</th>
+				<th>Status</th>
+				<th width="10%">Action</th>
+			</tr>
+
+			<?php
+				$i = 1;
+				while ($row = mysqli_fetch_assoc($bookings)) {
+					echo "<tr>
+							<td>$i</td>
+							<td>".date('jS M Y', strtotime($row['booking_date']))."</td>
+							<td>".date('h:i a', strtotime($row['booking_time']))."</td>
+							<td>$row[booking_type]</td>
+							<td>$$row[payment_amount]</td>
+							<td>$row[payment_status]</td>
+							<td><a href='booking-details.php?booking_id=$row[booking_id]&&booking_type=$row[booking_type]' class='view-btn'>View</a></td>
+						</tr>";
+					$i++;	
+				}
+			?>
+
+		</table>
+
+	</div>
+
+	<?php   
+		}else{
+			echo "<h3>No bookings yet</h3>";
+		}
+	?>
+
+</div>
+<?php  
+	require('template/footer.phtml'); 
+?>	

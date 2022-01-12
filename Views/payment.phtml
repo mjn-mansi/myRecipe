@@ -1,0 +1,216 @@
+<?php  
+	require('template/header.phtml'); 
+	require('Models/Payment.php');
+
+	require('Models/Booking.php');
+	
+	$bookingObj = new Booking();	
+	$paymentObj = new Payment();
+
+	$msg = $msg1 = $msg2 = '';
+
+	/*if (isset($_GET['cancel_booking'])) {
+		$cancelBooking = $bookingObj->cancelBooking($_GET['cancel_booking']);
+		if ($cancelBooking) {
+			header("Location:my-bookings.php?msg=Your Booking has been cancelled");
+		}else{
+			$msg = "Something is wrong"; 
+		}
+	}*/
+
+	if (isset($_GET['booking_id']) && isset( $_GET['booking_type'] ) ) {
+
+		$id = $_GET['booking_id'];
+
+		$bookingType = $_GET['booking_type'];
+		$bookingId = $_GET['booking_id'];		
+
+		$paymentDone = $bookingObj->checkPaymentStatus($id); 
+		$payR = mysqli_fetch_assoc($paymentDone);
+		if($payR['payment_status'] == 'paid'){
+			header("Location: booking-details.php?booking_id=$id&&booking_type=$payR[booking_type]");
+		}
+
+		if(isset ($_POST['submit'])){
+			$mode = $_POST['mode'];
+
+			if (isset($_GET['reorder'])) {
+				$date = $_POST['date'];
+				$time = $_POST['time'];
+				$reorderDone = $bookingObj->updateReorderTime($date, $time, $id); 
+			}
+  
+			if($mode == 'cash' || $mode == 'QRScan'){
+				if (isset($_GET['reorder'])) {
+					if($reorderDone) {
+						$paymentDone = $paymentObj->makeCashPayment($mode, $id); 
+					}
+				}else{
+					$paymentDone = $paymentObj->makeCashPayment($mode, $id); 
+				} 
+				$confirmation = "pending";
+			} 
+			elseif($mode == 'iban'){
+				$fname = $_POST['fname'];
+				$lname = $_POST['lname'];
+				$cardNo = $_POST['cardNo'];
+				$cvv = $_POST['cvv'];
+				$expiry = $_POST['expiry'];
+
+				if (isset($_GET['reorder'])) {
+					if($reorderDone) {
+						$paymentDone = $paymentObj->makeIbanPayment($mode, $id, $fname, $lname, $cardNo, $cvv, $expiry); 
+					}
+				}else{
+					$paymentDone = $paymentObj->makeIbanPayment($mode, $id, $fname, $lname, $cardNo, $cvv, $expiry);
+				}
+				$confirmation = "confirmed";
+			} 
+
+			if($paymentDone){
+
+				if($mode == 'iban') {
+					require('Models/Email.php');
+					$emailObj = new Email();
+
+					$send = $emailObj->sendConfirmationMail($bookingId, $bookingType, $_SESSION['user_email']);
+				}
+
+				
+				header("location: booking-details.php?booking_id=$id&&booking_type=$bookingType&&booking_status=$confirmation");
+			}else{
+				$msg = "Something is wrong";
+			}
+		}
+	
+?>
+<style>
+	#iban, #QRScan {
+		 display: none;
+	}
+</style>
+
+<div class="division">
+	<div class="in-division">
+		<form action="" method="post" class="form">
+			<div class="panel">
+				<h2 class="panel-title">Make Payment here</h2>
+				<?php  
+					if (isset($_GET['reorder'])) {
+						if ($_GET['reorder'] == 'yes') {
+				?>
+				<div class="form-group">			
+					<label for="">Select Date<span>*</span></label>
+					<input type="date" name="date" min="<?= date('Y-m-d'); ?>" value="<?= date('Y-m-d'); ?>"  class="form-control">			
+				</div>
+
+				<div class="form-group">			
+					<label for="">Select Time<span>*</span></label>
+					<input type="hidden" name="" id="now" value="<?= date('H:i:s'); ?>">
+
+					<input type="time" name="time" id="time" value="<?= date('H:i:s'); ?>" class="form-control">	 		
+				</div> 
+
+				<?php 
+						}
+					}
+				?>
+				
+				<?php 
+					if($msg != null) {
+						echo "<div class='error'>$msg</div>";
+					}
+				?>
+				<div class="form-group">			
+					<label for="">Payment Mode<span>*</span></label>
+					<select required name="mode" id="mode" class="form-control" id="paymentMode">
+						<option value="">--SELECT PAYMENT METHOD--</option>
+						<option value="cash">Cash</option>
+						<option value="iban">IBAN Code</option>
+						<option value="QRScan">QR SCAN</option>
+					</select>
+				</div>
+
+				<!-- <input type="hidden" name="amount" value="<?= $payment; ?>"> -->
+
+				<!-- <div class="form-group">			
+					<label for="">IBAN NO<span>*</span></label>
+					<input type="text" name="iban" placeholder="Enter ISO Code" required class="form-control" value="AB47 GHIJ 0203 0105 0203 04">
+				</div> -->
+
+				<div class="pay_block" id="iban">	
+
+					<div class="form-group">			
+						<label for="">First Name<span>*</span></label>
+						<input required type="text" name="fname" placeholder="Enter First Name" class="form-control" pattern="[A-Za-z]+" title="Enter valid first name containing letters only.">
+					</div>
+
+					<div class="form-group">			
+						<label for="">Last Name<span>*</span></label>
+						<input required type="text" name="lname" placeholder="Enter Last Name" class="form-control" pattern="[A-Za-z ]+" title="Enter valid last name containing letters only.">
+					</div>
+
+					<div class="form-group">			
+						<label for="">Card No<span>*</span></label>
+						<input required type="text" name="cardNo" placeholder="Enter Card No" class="form-control" pattern="[0-9-]{16,20}" title="Please enter valid Card no. of 16 digits">
+					</div>
+					<div class="form-group">			
+						<label for="">CVV<span>*</span></label>
+						<input required type="text" name="cvv" placeholder="Enter CVV" class="form-control" pattern="[0-9-]{3}" title="Please enter valid CVV no. of 3 digits">
+					</div>
+					
+					<div class="form-group">			
+						<label for="">Expiry Date<span>*</span></label>
+						<input required type="month" name="expiry" placeholder="Enter Expiry Date" class="form-control" min="<?= date('Y-m'); ?>">
+					</div>
+				
+				</div>
+
+				<div class="qr_block" id="QRScan">
+					<img src="images/qrCode.jpg" alt="">
+				</div>
+
+				<div class="form-group button-input">			
+					<input type="submit" value="Pay Now" name="submit" class="btn">
+				</div>
+
+			</div>
+		</form>
+	</div>
+	<div class="in-division">
+		<?php include 'booking-details-inc.phtml'; ?> 
+	</div>
+</div>
+
+
+<?php
+	}
+?>
+
+<script>
+	// let now = document.getElementById('now').value; 
+	// document.getElementById('time').min = now; 
+
+	let mode = document.getElementById('mode');
+	mode.addEventListener('change', function(){
+
+		document.querySelector('.pay_block').style.display = "none";
+		document.querySelector('.qr_block').style.display = "none";	
+
+		let modeValue = mode.value;
+
+		if(modeValue == 'cash' || modeValue == 'QRScan') {
+			let inps = document.querySelectorAll('.form-control');
+			inps.forEach(inp => inp.required = false);
+		}else if(modeValue == 'iban') {
+			let inps = document.querySelectorAll('.form-control');
+			inps.forEach(inp => inp.required = true);
+		}		
+		
+		document.getElementById(modeValue).style.display = "block";
+	})
+</script>
+
+<?php  
+	require('template/footer.phtml'); 
+?>

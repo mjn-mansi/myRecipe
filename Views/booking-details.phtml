@@ -1,0 +1,37 @@
+<?php  
+	require('template/header.phtml'); 
+	require('Models/Booking.php');
+	
+	$bookingObj = new Booking();
+
+	if ( isset( $_GET['booking_id'] ) && isset( $_GET['booking_type'] )  ) {
+
+		$bookingType = $_GET['booking_type'];
+		$bookingId = $_GET['booking_id'];
+?>
+
+<!-- <div class="panel" > -->
+	<h2 class="panel-title">My Booking Details</h2>
+
+	<?php  
+		if (isset($_GET['booking_status'])) {
+			if($_GET['booking_status'] == 'confirmed') {
+				echo "<p style='text-align:center;color:green;font-weight:bold;'>Your booking id is: $bookingId. $_GET[booking_status]</p>";
+
+			}elseif($_GET['booking_status'] == 'pending') {
+				echo "<p style='text-align:center;color:green;font-weight:bold;'>Your booking id is: $bookingId. $_GET[booking_status] <a href='booking-details.php?booking_id=$bookingId&&booking_type=$bookingType'>Click here </a>after confirmation</p>";
+
+			}
+		}
+	?>
+
+	<?php include 'booking-details-inc.phtml'; ?> 
+
+<!-- </div> -->
+
+<?php 
+	}
+?>
+<?php  
+	require('template/footer.phtml'); 
+?>	

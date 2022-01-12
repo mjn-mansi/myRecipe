@@ -1,0 +1,252 @@
+<?php  
+	require('template/header.phtml'); 
+	require('Models/Booking.php');
+
+    $bookingObj = new Booking();
+	
+if (isset($_GET['bookingType'])) {
+
+	$bookingType = $_GET['bookingType'];
+    	
+	$msg = $msg1 = $msg2 = $limit = $person ='';
+
+	$user = '';
+
+	if (isset($_GET['booking_id'])) {  // FOR REORDERS
+		$booking = $bookingObj->reorderFill($_GET['booking_id']);
+		$bookData = mysqli_fetch_assoc($booking);
+		$limit = $bookData['booking_limit'];
+		$person = $bookData['noOfPerson'];
+	}
+
+	if (isset($_POST['takeAwaySubmit'])) {
+		$menus = $_POST['menus']; 
+		$date = date('Y-m-d');
+		$time = date('H:i:s');
+		$qty = $_POST['qty']; 
+
+		// print_r($_POST);
+		$booking = $bookingObj->bookingTakeAway($menus, $date, $time, $qty);
+		if($booking){
+            header("location:payment.php?booking_id=".$booking."&&booking_type=".$bookingType);
+        }else{
+            $msg = "Oops! Something went wrong.";
+        }		
+	}
+
+
+	if(isset ($_POST['seaViewSubmit'])){
+		$date = $_POST['date'];
+		$time = $_POST['time'];
+		$bookingTimeLimit = $_POST['bookingTimeLimit'];
+		$person = $_POST['person'];
+		$ages = $_POST['age'];
+
+		$booking = $bookingObj->bookingSeaView($date, $time, $bookingTimeLimit, $person, $ages);
+	    if($booking){
+            header("location:payment.php?booking_id=".$booking."&&booking_type=".$bookingType);
+        }else{
+            $msg = "Oops! Something went wrong."; 
+        }		
+	}
+
+	
+	if(isset ($_POST['dineInSubmit'])){
+		$person = $_POST['person'];
+		$ages = $_POST['age'];
+		$date = $_POST['date'];
+		$time = $_POST['time'];
+		$menus = $_POST['menus'];
+		$qty = $_POST['qty'];
+		// print_r($_POST);
+		$booking = $bookingObj->bookingDineIn($date, $time, $person, $ages, $menus, $qty);
+	    if($booking){
+            header("location:payment.php?booking_id=".$booking."&&booking_type=".$bookingType);
+        }else{
+            $msg = "Oops! Something went wrong.";
+        }		
+	}
+
+?>
+<?php   
+	if($msg != null) {
+		echo "<div class='error'>$msg</div>";
+	}
+?>
+
+<style>
+	.menu-qty{
+		display: none;
+	}
+</style>
+
+<form action="" method="post" class="form">
+
+	<div class="panel">
+
+		<?php 
+			if ($bookingType == 'takeAway') {
+				echo "<h2 class='panel-title'>Book Your Food with us</h2>";
+			}elseif($bookingType == 'dineIn'){
+				echo "<h2 class='panel-title'>Book Your Table & Dine in</h2>";
+			}elseif($bookingType == 'seaView'){
+				echo "<h2 class='panel-title'>Book Sea View</h2>";
+			}
+		?>
+
+<?php 
+	if($bookingType == 'seaView' || $bookingType == 'dineIn') {
+?>			
+
+		<div class="form-group">			
+			<label for="">No of members<span>*</span> <br>(max 5 allowed and no kids below 5 years allowed )</label>
+			<input type="number" name="person" placeholder="Enter No of Person" required min="1" max="5" id="personCnt" class="form-control" value="<?= $person; ?>">			
+		</div> 
+
+		<div id="block"></div>		
+
+		<div class="form-group">			
+			<label for="">Select Date<span>*</span></label>
+			<input type="date" name="date" required min="<?= date('Y-m-d'); ?>" value="<?= date('Y-m-d'); ?>" class="form-control">			
+		</div>
+
+		<div class="form-group">			
+			<label for="">Select Time<span>*</span></label>
+			<input type="time" name="time" required value="<?= date('H:i:s'); ?>" class="form-control">			
+		</div> 
+
+
+<?php  
+	}
+	if ($bookingType == 'seaView') {
+?>
+		<div class="form-group">			
+			<label for="">Select Booking Time Limit<span>*</span></label>
+			<select name="bookingTimeLimit" id=""  class="form-control">
+				<?php   
+					$limits = ['30 minutes', '60 minutes'];
+					foreach($limits as $lmt){
+						if($limit == $lmt){
+							echo "<option value='$lmt' selected>$lmt</option>";
+						}else{
+							echo "<option value='$lmt'>$lmt</option>";
+						}
+					}
+				?>
+				
+			</select>
+		</div>
+		
+<?php  
+	}
+	if($bookingType == 'takeAway' || $bookingType == 'dineIn') {
+
+		echo "<div class='form-group'>
+				<div class='menu-card'>";
+
+				$categories = $bookingObj->showCategory();
+
+				if ($categories) {
+			
+					while ($categoryRow = mysqli_fetch_assoc($categories)) {
+						echo "<div class='inner-menu-card'>";
+							echo "<h3>$categoryRow[category_name]</h3>";
+							$menuQuery = mysqli_query($bookingObj->connect(), "SELECT * FROM menu WHERE category_id = '$categoryRow[category_id]'");
+							
+							while ($menuRow = mysqli_fetch_assoc($menuQuery)) {
+								echo "<div class='menu-list'>";
+									echo "<div class='opt'><input type='checkbox' name='menus[".$menuRow['menu_id']."]' value='".$menuRow['menu_id']."' class='menu-check' id='menu".$menuRow['menu_id']."' onchange='menu_add($menuRow[menu_id])'  required='true'>
+										<label class='menu-name'>".$menuRow['menu_name']."</label> 
+										</div>
+										<div id='newblock".$menuRow['menu_id']."'></div>
+										<label class='menu-price'> ($".$menuRow['menu_price'].") </label>
+										";
+								echo "</div>";
+							}
+						echo "</div>";
+					}
+					
+				}
+
+
+			echo "</div>
+			</div>";
+	}
+?>
+
+		<div class="form-group button-input">
+			<?php 
+				if ($bookingType == 'takeAway') {
+					echo "<input type='submit' value='Book Now' name='takeAwaySubmit' class='btn'>";
+				}elseif($bookingType == 'dineIn'){
+					echo "<input type='submit' value='Book  Now' name='dineInSubmit' class='btn'>";					
+				}elseif($bookingType == 'seaView'){
+					echo "<input type='submit' value='Book Now' name='seaViewSubmit' class='btn'>";
+				}
+			?>
+		</div>
+
+	</div>
+</form>
+<?php 
+	}
+?>
+
+
+<script>
+
+// INCREASE & DECREASE QUANTITY STARTS
+	function menu_add(id) {
+		
+		let vid = id;
+		let nid = "newblock"+vid;
+		
+		document.getElementById(nid).innerHTML = `<div class="menuqty" id="menu_qty${vid}"><div class="valuebtn" id="decrease" onclick="decreaseValue(${vid})" value="Decrease Value">-</div><input type="text" class="no" id="${vid}" value="" name="qty[${vid}]"/><div class="valuebtn" id="increase" onclick="increaseValue(${vid})"  value="Increase Value">+</div></div>`;
+		
+		let mid = "menu" + vid;
+
+		if(document.getElementById(mid).checked == true){
+			document.getElementById(vid).value = 1;
+			let allmenus = document.querySelectorAll('.menu-check');
+			allmenus.forEach(menu => menu.required = false);
+		}else{
+			document.getElementById(vid).value = '';
+			document.getElementById(nid).display = 'none';
+			document.getElementById(nid).innerHTML = '';
+		}
+	}
+
+	function increaseValue(id) {
+		// console.log(id);
+		var value = parseInt(document.getElementById(id).value, 10);
+		value = isNaN(value) ? 0 : value;
+		value++;
+		document.getElementById(id).value = value;
+	}
+
+	function decreaseValue(id) {
+		var value = parseInt(document.getElementById(id).value, 10);
+		value = isNaN(value) ? 0 : value;
+		value < 1 ? value = 1 : '';
+		value--;
+		document.getElementById(id).value = value;
+	}
+// INCREASE & DECREASE QUANTITY ENDS
+
+	let personCnt = document.querySelector('#personCnt');
+	personCnt.addEventListener("change", function(){
+		let cnt = personCnt.value;
+		if(cnt <=5 ){
+			var inp='';
+			for (var i = 1; i <= cnt; i++) {
+				inp += `<div class='form-group'><label>Enter age of member ${i}</label><input type='number' name='age[]' class='form-control' min='6' placeholder='Enter age of member ${i} ' required></div>`;
+			}
+			document.querySelector('#block').innerHTML = inp;
+		}else{
+			document.querySelector('#block').innerHTML = "Not more than 5 members allowed";
+		}	
+	});
+
+</script>
+
+<?php require('template/footer.phtml') ?>

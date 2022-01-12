@@ -1,0 +1,63 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Menu.php');
+
+	$menuObj = new Menu();
+	$users = $menuObj->show();
+
+	if (isset($_GET['menu_del_id'])) {
+		$delQ = $menuObj->delete($_GET['menu_del_id']);
+		if($delQ) {
+            header("location:view-menu.php?msg=Successfully Deleted");
+		}else{
+            $msg = "Oops! something went wrong. Please Try again later";
+		}
+	}
+	
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+	<div class="panel">
+
+		<h2 class="panel-title">View Menu</h2>
+	
+		<div class="tbl-container">	
+			<table class="tbl">
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Category</th>
+					<th>Action</th>
+				</tr>
+				<?php
+					$i = 1;
+					while ($row = mysqli_fetch_assoc($users)) {
+						echo "<tr>
+								<td>$i</td>
+								<td>$row[menu_name]</td>
+								<td>$$row[menu_price]</td>
+								<td>$row[category_name]</td>
+								<td>
+									<a href='menu.php?menu_edit_id=$row[menu_id]' class='edit-btn'>Edit</a>
+									<a href='view-menu.php?menu_del_id=$row[menu_id]' class='delete-btn'>Delete</a>
+								</td>
+							</tr>";
+						$i++;	
+					}
+				?>
+			</table>
+		</div>
+	
+	</div>
+
+<?php  
+	require('template/footer.phtml'); 
+?>

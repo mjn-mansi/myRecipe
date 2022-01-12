@@ -1,0 +1,145 @@
+@media(min-width: 768px) {	/*medium screen*/
+
+/*HOME PAGE STARTS*/
+	.home-title {
+		font-size: 25px;
+	}
+	.gallery-images {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.in-video{
+		flex-basis: 47%;
+	}
+/*HOME PAGE ENDS*/
+
+
+/*FOOTER START-S	*/
+	.contact-grid {
+		justify-content: space-between;
+		padding: 50px;
+		flex-direction: row;
+	}
+	.contact-box{
+		flex-basis: 40%;
+	}
+	.contact-box h1{
+		margin-bottom: 14px;
+	}
+	.bottom-nav{
+		justify-content: flex-end;
+	}
+	.bottom-nav p{
+		flex-basis: 60%;
+		text-align: left;
+	}
+	.bottom-nav .links{
+		flex-basis: 30%;
+		text-align: right;
+	}
+/*FOOTER ENDS	*/
+
+	.bill-col{
+		flex-basis: 25%!important;
+	}
+
+	.grid{
+		grid-template-columns: repeat(2, 1fr); 
+	}	
+}
+
+@media(min-width: 992px) {	/*large screen*/
+
+.checkMenu{
+	display: block;
+}
+
+/*HEADER STARTS*/
+	.logo{
+	    width: 80%;
+	}
+	.dropdown:hover .dropmenu{
+		display: block;
+	}
+/*HEADER ENDS*/
+
+/*HOME PAGE STARTS	*/
+	.section-block{
+		padding: 70px 60px;
+	}
+	.home-section .left{
+		flex-basis: 65%;
+	}
+	.home-section .right{
+		flex-basis: 30%;
+	}
+	.home-title {
+		font-size: 30px;
+	}
+	.offer{
+		grid-template-columns: repeat(1, 1fr);
+	}
+	.offer img{
+		width: 100%;
+	}
+
+/*HOME PAGE ENDS	*/
+
+
+/*FOOTER STARTS	*/
+	.contact-grid {
+		justify-content: space-evenly;
+		padding: 50px;
+	}
+	.contact-box{
+		flex-basis: 30%;
+	}
+/*FOOTER ENDS	*/
+
+/*OTHER SECTIONS STARTS*/
+	.division{
+		justify-content: space-between;
+	}
+	.in-division{
+		flex-basis: 50%;
+	}
+	.panel{
+    	padding: 70px 70px;
+		/*margin-top: 148px;*/
+	}
+	.form .form-control{
+		flex-basis: 70%;
+	}
+
+	.form label{
+		flex-basis: 30%;
+		margin-bottom: 0;
+	}
+	.inner-menu-card{
+		flex-basis: 45%;
+	}
+	.opt {
+	    flex-basis: 50%;
+	}
+	label.menu-price {
+	    flex-basis: 10%;
+	}
+	.user-tbl{
+	    font-size: 14px;
+	}
+	.detail-container {
+		padding: 50px;
+		width: 80%;
+	}
+	.bill-col{
+		flex-basis: 25%;
+	}
+	.invoice-heading{
+		/*flex-direction: row;*/
+	}
+	
+/*OTHER SECTIONS ENDS*/
+	
+	.grid{
+		grid-template-columns: repeat(3, 1fr);
+	}
+}	

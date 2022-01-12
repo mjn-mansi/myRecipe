@@ -1,0 +1,31 @@
+</div>
+
+<footer>
+
+	<div class="bottom-nav">
+		<p>All Rights reserved.</p>
+
+	</div>
+</footer>
+
+<script>
+	function showMenu(){
+		
+
+		if(document.getElementById('chckMenu').checked == true){
+			document.getElementById('navbar').style.display = "flex";
+		}else{
+			document.getElementById('navbar').style.display = "none";
+		}
+	}
+	function drop(menu){
+		allMenus = document.querySelectorAll('.dropmenu');
+		allMenus.forEach(a=>a.classList.add("hideMenuOnClick"));
+
+		document.getElementById(menu).classList.remove("hideMenuOnClick");
+		document.getElementById(menu).classList.toggle("showMenuOnClick");
+	}
+</script>
+
+</body> 
+</html>

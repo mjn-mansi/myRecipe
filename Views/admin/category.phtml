@@ -1,0 +1,92 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Category.php');
+
+	$categoryObj = new Category();
+	$categories = $categoryObj->show();
+
+	$msg = $category = '';
+
+
+	if (isset($_GET['category_edit_id'])) {
+		$editQ = $categoryObj->edit($_GET['category_edit_id']);
+		if($editQ) {
+			$editR = mysqli_fetch_assoc($editQ);
+            $category = $editR['category_name'];
+		}else{
+            $msg = "Oops! something went wrong. Please Try again later";
+		}
+
+		if(isset ($_POST['submit'])){
+			$category = $_POST['category'];
+
+			$exists = $categoryObj->checkeditExists($category, $_GET['category_edit_id']);
+			if($exists) {
+				$msg = "Category already exists";
+			}else{
+				$category = $categoryObj->update($category, $_GET['category_edit_id']);
+			    if($category){
+		            header("location:view-category.php?msg=Updated Successfully");
+		        }else{
+		            $msg = "Oops! something went wrong. Please Try again later";
+		        }
+		    }    	
+		}
+	}else{
+		if(isset ($_POST['submit'])){
+			
+			$category = $_POST['category'];
+
+			$exists = $categoryObj->checkExists($category);
+			if($exists) {
+				$msg = "Category already exists";
+			}else{
+				$category = $categoryObj->add($category);
+			    if($category){
+		            header("location:category.php?msg=Successfully Added");
+		        }else{
+		            $msg = "Oops! something went wrong. Please Try again later";
+		        }
+			}
+					
+		}
+	}	
+
+?>
+
+<?php 
+	if (isset($_GET['msg'])) {
+		echo "<div class='success'>$_GET[msg]</div>";
+	}
+?>
+
+		<form action="" method="post" class="form">
+
+			<div class="panel">
+
+				<h2 class="panel-title">Category</h2>
+				
+				<?php 
+					if($msg != null) {
+						echo "<div class='error'>$msg</div>";
+					}
+				?>
+
+				
+				<div class="form-group">			
+					<label for="">Category</label>
+					<input type="text" name="category" placeholder="Enter Category Name" value="<?= $category; ?>" class="form-control" required pattern="[a-zA-Z ]{1,20}" title="Please enter valid value containing only letters and length must be 1-20 characters">			
+				</div>
+				<div class="form-group button-input">			
+					<input type="submit" value="Submit" name="submit" class="btn">
+				</div>
+
+			</div>
+		</form>
+	
+<?php  
+	require('template/footer.phtml'); 
+?>
+

@@ -1,0 +1,143 @@
+<?php  
+	require('template/header.phtml'); 
+	include 'session.php';
+	
+	require('../Models/Admin.php');
+	require('../Models/Email.php');
+
+	$adminObj = new Admin();
+	$emailObj = new Email();
+
+	if ( isset($_GET['bookingType']) && isset($_GET['paymentStatus']) && isset($_GET['confirm']) && isset($_GET['user']) ) {
+		
+		$bookingType = $_GET['bookingType'];
+		$status = $_GET['paymentStatus'];
+		$confirm = $_GET['confirm'];
+		$user = $_GET['user'];
+
+		$adminObj->confirmBookings($bookingType, $status, $confirm);
+		// if($confirmBookings) {
+			$send = $emailObj->sendConfirmationMail($confirm, $bookingType, $user);
+			if($send) {
+				header("location: bookings.php?bookingType=$bookingType&&paymentStatus=$status");	
+			}else{
+				echo "Mail not sent";
+			}
+		// }
+
+	}
+
+	if ( isset($_GET['bookingType']) && isset($_GET['paymentStatus']) ) {
+		
+		$bookingType = $_GET['bookingType'];
+		$status = $_GET['paymentStatus'];
+
+		$bookings = $adminObj->showBookings($bookingType, $status);
+			
+?>
+
+		<?php 
+			if (isset($_GET['msg'])) {
+				echo "<div class='success'>$_GET[msg]</div>";
+			}
+		?>
+
+	<div class="panel">
+
+		<?php  
+			if ($bookingType == 'takeAway') {
+				$booking = "Take Away";
+			}elseif ($bookingType == 'dineIn') {
+				$booking = "Table & Dine in";
+			}elseif ($bookingType == 'seaView') {
+				$booking = "Sea View";
+			}
+		?>
+
+		<h2 class="panel-title">View <?= $booking; ?> Bookings</h2>
+		<?php 
+			if(mysqli_num_rows($bookings) >= 1){
+		?>
+		<div class="tbl-container">	
+			<table class="tbl text-sm">
+				<tr>
+					<th>#</th>
+					<th width="5%">Booking Id</th>
+					<th>Customer</th>
+					<th>Date</th>
+					<?php 
+						if ($bookingType == 'seaView') {
+							echo "<th>Limit</th>";
+						}
+						if ($bookingType == 'seaView' || $bookingType == 'dineIn') {
+							echo "<th>Person</th>";
+						}
+
+						if ($bookingType == 'takeAway' || $bookingType == 'dineIn') {
+							echo "<th>Food Ordered</th>";
+						}
+					?>
+					<th>Amount</th>
+					<th>Mode</th>
+					<th>Status</th>
+				</tr>
+				<?php
+					$i = 1;
+					while ($row = mysqli_fetch_assoc($bookings)) {
+						echo "<tr>
+								<td>$i</td>
+								<td>$row[booking_id]</td>
+								<td>$row[name]</td>
+								<td>".date('jS M Y', strtotime($row['booking_date']))."<br>@".date('h:i a', strtotime($row['booking_time']))."</td>
+								";
+							if ($bookingType == 'seaView') {
+								echo "<td>$row[booking_limit]</td>";
+							}	
+							if ($bookingType == 'seaView' || $bookingType == 'dineIn') {
+								echo "<td>Members: $row[noOfPerson]<br>Ages: $row[person_ages]</td>";
+							}
+
+							if ($bookingType == 'takeAway' || $bookingType == 'dineIn') {
+								$foods = mysqli_query($adminObj->conn, "SELECT food_name, food_price, food_qty FROM foodbooking WHERE booked_id = '$row[booking_id]'");
+								echo "<td>";
+									$j = 1;	
+									while ($food = mysqli_fetch_assoc($foods)) {
+										// $tot = $food['food_price'] * $food['food_qty'];
+										echo "<p>$j. $food[food_name]($$food[food_price] * $food[food_qty])</p>";
+										$j++;
+									}
+								echo "</td>";
+							}
+						echo	"<td>$$row[payment_amount]</td>
+								<td>$row[payment_mode]</td>";
+								if($row['payment_status'] == 'paid'){ 
+									echo "<td>PAID</td>";
+								}elseif($row['payment_status'] == 'pending' && $row['payment_mode']){
+									echo "<td><a href='bookings.php?bookingType=$bookingType&&paymentStatus=$status&&confirm=$row[booking_id]&&user=$row[email]' class='delete-btn'>Confirm</a></td>";
+								}
+								else{
+									echo "<td>Payment mode not selected</td>";
+								}
+							echo "</tr>";
+						$i++;	
+					}
+				?>
+			</table>
+		</div>
+		<?php 
+			}else{
+				echo "<h3>No Record found</h3>";
+			}
+		?>
+	
+	</div>
+
+<?php 
+	}else{
+		echo "<h3>No Record found</h3>";
+	}
+?>
+<?php  
+	require('template/footer.phtml'); 
+?>
+

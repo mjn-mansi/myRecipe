@@ -1,0 +1,115 @@
+<?php 
+   session_start();
+	require('../database/connection.php');
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title><?php echo $view->pageTitle; ?> | Cafe Coffee Day Admin Panel</title>
+	<link rel="stylesheet" href="../css/style.css">
+	<link rel="stylesheet" href="../css/navbar.css">
+	<link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+	
+
+<header>
+
+	<div class="logo-block">	
+		<div class="logo">
+			<img src="../images/logo1.png" alt="" class="logo-img">
+			<div class="logo-name">
+				<a href="index.php" >Cafe Coffe Day</a>
+			</div>
+			
+		</div>	
+		<div class="menu-icon">
+			<input type="checkbox" id="chckMenu" onchange="showMenu()">
+			<label for="chckMenu" class="chkMenu">&#8801;</label>
+		</div>
+	</div>
+	
+	<?php
+	    if(isset($_SESSION['user_type']) ){
+	    	if ($_SESSION['user_type'] == 'admin') {
+	?>
+		<nav class="top-nav" id="navbar">
+			<ul>
+				<li><a href="dashboard.php">Dashboard</a></li>
+				<li><a href="users.php">Users</a></li>
+
+				<li class="dropdown">
+					<a href="#" onclick="drop('nav-menu')">Menu&#9660;</a>
+					<ul class="dropmenu" id="nav-menu">
+						<li><a href="view-menu.php">View</a></li>
+						<li><a href="menu.php">Add</a></li>
+					</ul>
+				</li>
+
+				<li class="dropdown">
+					<a href="#" onclick="drop('nav-category')">Category&#9660;</a>
+					<ul class="dropmenu" id="nav-category">
+						<li><a href="category.php">Add</a></li>
+						<li><a href="view-category.php">View</a></li>
+					</ul>
+				</li>
+
+				<li class="dropdown">
+					<a href="#" onclick="drop('nav-bookings')">Bookings&#9660;</a>
+					<ul class="dropmenu" id="nav-bookings">
+						<li><a href="bookings.php?bookingType=takeAway&&paymentStatus=all">Take Away</a></li>
+						<li><a href="bookings.php?bookingType=dineIn&&paymentStatus=all">Table & Dine in</a></li>
+						<li><a href="bookings.php?bookingType=seaView&&paymentStatus=all">Sea View</a></li>
+					</ul>
+				</li>
+
+				<?php
+					require('../Models/Notification.php');
+					$notifObj = new Notification();
+					$cntpending = $notifObj->countpending(); 
+					$cntpendingTakeAway = $notifObj->countpendingtakeAway();
+					$countpendingdineIn = $notifObj->countpendingdineIn();
+					$countpendingseaview = $notifObj->countpendingseaview();					
+				?>
+
+				<li class="dropdown">
+					<a href="#" onclick="drop('conf-bookings')">Confirm Bookings <b><?php echo ($cntpending > 0 ) ?  "<span class='badge'>$cntpending </span>" : '';  ?></span></b> &#9660;</a>
+					
+					<ul class="dropmenu" id="conf-bookings">
+						<li><a href="bookings.php?bookingType=takeAway&&paymentStatus=pending">
+							Take Away <b><?php echo ($cntpendingTakeAway > 0 ) ?  "<span class='badge'>$cntpendingTakeAway </span>" : '';  ?></span></b>
+						</a></li>
+						<li><a href="bookings.php?bookingType=dineIn&&paymentStatus=pending">
+							Table & Dine in <b><?php echo ($countpendingdineIn > 0 ) ?  "<span class='badge'>$countpendingdineIn </span>" : '';  ?></span></b>
+						</a></li>
+						<li><a href="bookings.php?bookingType=seaView&&paymentStatus=pending">
+							Sea View <b><?php echo ($countpendingseaview > 0 ) ?  "<span class='badge'>$countpendingseaview </span>" : '';  ?></span></b>
+						</a></li>
+					</ul>
+				</li>
+
+ 
+	        	<li class="dropdown" >
+					<a href="#" onclick="drop('nav-admin')"><?= $_SESSION['user_name']; ?>&#9660;</a>
+					<ul class="dropmenu" id="nav-admin">
+	            	<li><a href="logout.php">Logout</a></li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	
+	<?php 
+	    }
+	    	 } 
+	    
+	?>
+
+</header>
+
+
+
+
+<div class="container">
